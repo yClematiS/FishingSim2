@@ -632,7 +632,7 @@ local ChestToggle = MainTab:CreateToggle({
                             end
                         end
                     end)
-                    if MobHunt and Loots and not foundChest then
+                    if MobHunt or Loots and not foundChest then
                         GettingAllChest = false
                     end
                     if not MobHunt and not Loots and not foundChest then
@@ -715,7 +715,7 @@ local ChestToggle = MainTab:CreateToggle({
                             end
                         end
                     end
-                    if MobHunt and Loots and not foundChest then
+                    if MobHunt or Loots and not foundChest then
                             GettingShipTreasure = false
                     end
                     if not MobHunt and not Loots and not foundChest then
@@ -1228,4 +1228,5 @@ end
 
 Rayfield:LoadConfiguration()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
+
+loadstring(game:HttpGet("https:/https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
