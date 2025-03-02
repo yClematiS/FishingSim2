@@ -650,6 +650,7 @@ local ChestToggle = MainTab:CreateToggle({
                         elseif DefaultLootChestMethod == "Teleport" then
                             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(31, 41, -303)
                         end
+                        GettingShipTreasure = false
                     end
                 end
             end)
@@ -731,6 +732,7 @@ local ChestToggle = MainTab:CreateToggle({
                         elseif DefaultLootChestMethod == "Teleport" then
                             game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(31, 41, -303)
                         end
+                        GettingShipTreasure = false
                     end
                     task.wait(1)
                 end
