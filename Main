@@ -1227,3 +1227,5 @@ while _G.searcherayfield and not foundray do
 end
 
 Rayfield:LoadConfiguration()
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
