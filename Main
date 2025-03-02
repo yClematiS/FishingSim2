@@ -101,6 +101,7 @@ local MainWindow = Rayfield:CreateWindow({
 })
 
 _G.AutoSellDelay = 30
+_G.FishCaughtDelay = 2.1
 
 local MainTab = MainWindow:CreateTab("Auto Farm")
 local InventorySection = MainTab:CreateSection("Inventory")
@@ -191,7 +192,7 @@ local AutoFishToggle = MainTab:CreateToggle({
                 task.spawn(function()
                     game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("FishBiting"):InvokeServer()
                 end)
-                task.wait(2.1)
+                task.wait(_G.FishCaughtDelay)
                 game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("FishCaught"):FireServer()
             end
         end
@@ -210,7 +211,7 @@ ghostpart.Parent = game.Workspace
 defaultPlace2Farm = CFrame.new(-59.645916, 35.1940689, -53.6481552, -0.367248833, 0.195572346, 0.909329474, 0.208937556, 0.970005274, -0.124238953, -0.906351745, 0.144366413, -0.39709568)
 local Place2Farm = MainTab:CreateDropdown({
     Name = "Ghost Location",
-    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave"},
+    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave","Fungi Lagoon"},
     CurrentOption = "Port Jackson",
     MultipleOptions = false,
     Flag = "SelectedPlace",
@@ -234,6 +235,8 @@ local Place2Farm = MainTab:CreateDropdown({
             location2farm = CFrame.new(-1574.44348, 38.1911087, 1168.02246, 0.174147293, -1.2217324e-08, 0.984719634, 6.46782272e-09, 1, 1.1263074e-08, -0.984719634, 4.40755787e-09, 0.174147293)
         elseif defaultPlace2Farm == "Port Jackson's Cave" then
             location2farm = CFrame.new(2519.26733, 38.1911125, 31573.5352, -0.951426625, -3.38896413e-08, -0.307875574, -1.99341272e-08, 1, -4.84734208e-08, 0.307875574, -3.99816749e-08, -0.951426625)
+        elseif defaultPlace2Farm == "Fungi Lagoon" then
+            location2farm = CFrame.new(466.839081, 38.1911087, 3576.58813, -0.936732411, -1.37031453e-08, -0.350046307, -2.51221586e-08, 1, 2.80808408e-08, 0.350046307, 3.50981502e-08, -0.936732411)
         end
         
         ghostpart.CFrame = location2farm
@@ -745,7 +748,7 @@ local TweenService = game:GetService("TweenService")
  local TpMethods = {"Instant", "Tween"}
  local DefaultTp = "Unknown"
  local Location = {
-     "Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3"
+     "Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Fungi Lagoon"
  }
  local DefaultLocation = "Unknown"
  local TweenSpeed = 100
@@ -757,7 +760,8 @@ local TweenService = game:GetService("TweenService")
      ["Pharaoh's Dunes"] = CFrame.new(-4143, 46, 262),
      ["Monster's Borough 1"] = CFrame.new(-3248, 46, 2732),
      ["Monster's Borough 2"] = CFrame.new(-905, 46, 3052),
-     ["Monster's Borough 3"] = CFrame.new(-1571, 88, 1172)
+     ["Monster's Borough 3"] = CFrame.new(-1571, 88, 1172),
+     ["Fungi Lagoon"] = CFrame.new(463, 52, 3679)
  }
  local TeleportTab = MainWindow:CreateTab("Teleport")
  local Dropdown = TeleportTab:CreateDropdown({
@@ -933,6 +937,27 @@ game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFun
     end
 })
 
+AAutoChestRandom = false
+local AutoChestRandom = Ramdomy:CreateToggle({
+    Name = "Auto Random",
+    CurrentValue = false,
+    Flag = "AutoChestRandom",
+    Callback = function(Value)
+        AAutoChestRandom = Value
+        if AAutoChestRandom then
+            while AAutoChestRandom do
+                wait()
+                local args = {
+                    [1] = selectchest,
+                    [2] = false
+                }
+                
+                game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFunction:InvokeServer(unpack(args))
+            end
+        end
+    end,
+ })
+
 local Section = Ramdomy:CreateSection("Buy Pet Egg")
 
 local petegg = {"normalegg", "royalegg", "rubyegg", "voidegg"}
@@ -968,15 +993,36 @@ local args = {
 
 game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFunction:InvokeServer(unpack(args))
 
-
     end
 })
 
+AAutoEggRandom = false
+local AutoEggRandom = Ramdomy:CreateToggle({
+    Name = "Auto Random",
+    CurrentValue = false,
+    Flag = "AutoEggRandom",
+    Callback = function(Value)
+        AAutoEggRandom = Value
+        if AAutoEggRandom then
+            while AAutoEggRandom do
+                wait()
+                
+local args = {
+    [1] = selectpet,
+    [2] = false
+}
 
-local Ramdomy = MainWindow:CreateTab("Quest")
-local Section = Ramdomy:CreateSection("Crystal Cave")
+game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFunction:InvokeServer(unpack(args))
 
-local Button = Ramdomy:CreateButton({
+            end
+        end
+    end,
+ })
+
+local Quest = MainWindow:CreateTab("Quest")
+local Section = Quest:CreateSection("Crystal Cave")
+
+local Button = Quest:CreateButton({
     Name = "Unlock Crystal Cave",
     Callback = function()
         local args = {
@@ -990,7 +1036,7 @@ local Button = Ramdomy:CreateButton({
     end
 })
 
-local Button = Ramdomy:CreateButton({
+local Button = Quest:CreateButton({
     Name = "Enter Crystal Cave",
     Callback = function()
         local args = {
@@ -1021,6 +1067,33 @@ local OceanWalkers = Misc:CreateToggle({
 end
 })
 
+local Walkspeed = Misc:CreateSlider({
+    Name = "Walkspeed",
+    Range = {16, 100},
+    Increment = 1,
+    Suffix = "Bananas",
+    CurrentValue = 16,
+    Flag = "Walkspeed",
+    Callback = function(Value)
+    local me = game.Players.LocalPlayer.Character.Humanoid
+    me.WalkSpeed = Value
+    end,
+ })
+
+ local JumpPower = Misc:CreateSlider({
+    Name = "JumpPower",
+    Range = {50, 1000},
+    Increment = 10,
+    Suffix = "Bananas",
+    CurrentValue = 50,
+    Flag = "JumpPower",
+    Callback = function(Value)
+    local me = game.Players.LocalPlayer.Character.Humanoid
+    me.JumpPower = Value
+    end,
+ })
+
+
 local Settings = MainWindow:CreateTab("Setting")
 local Settings1 = Settings:CreateSection("Settings")
 local Autoselldelay = Settings:CreateInput({
@@ -1033,6 +1106,22 @@ local Autoselldelay = Settings:CreateInput({
         local delay = tonumber(Text)
         if delay then
             _G.AutoSellDelay = delay
+        else
+            print("Invalid input! Please enter a valid number.")
+        end
+    end,
+})
+
+local FishCaughtDelay = Settings:CreateInput({
+    Name = "Fish Caught Delay(s)",
+    CurrentValue = _G.FishCaughtDelay,
+    PlaceholderText = "Recommand 2.1",
+    RemoveTextAfterFocusLost = false,
+    Flag = "FishCaughtDelay",
+    Callback = function(Text)
+        local delay = tonumber(Text)
+        if delay then
+            _G.FishCaughtDelay = delay
         else
             print("Invalid input! Please enter a valid number.")
         end
