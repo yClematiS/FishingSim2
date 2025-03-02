@@ -27,8 +27,6 @@ while not rootPart do
     wait()
 end
 
-print("พบ HumanoidRootPart แล้ว!")
-
 game:GetService("Players").LocalPlayer.Idled:connect(function()
     game:GetService("VirtualUser"):CaptureController()
     game:GetService("VirtualUser"):ClickButton2(Vector2.new())
@@ -61,20 +59,29 @@ local function startTypingAnimation3()
     random_name = " | Clematis Hub | " .. username .. " | Session : ( "..randomText1.."-"..randomText2.." ) "
 end
 spawn(startTypingAnimation3)
+
+local usernames = game.Players.LocalPlayer.Character.Name
+local pid = tostring(game.PlaceId)
+
+print("Loading Lib")
 _G.theme = "Amethyst"
+wait(0.2)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+print("Ui Lib Loaded")
+wait(1)
+print("Loading Function")
 local MainWindow = Rayfield:CreateWindow({
-    Name = random_name,
+    Name = random_name or "Clematis Hub | Err Loading | Session : ( Error! )",
     Icon = 0,
-    LoadingTitle = "Loaded!",
-    LoadingSubtitle = "Script By seaweed_hunter",
+    LoadingTitle = "Loading!",
+    LoadingSubtitle = "Script By Seaweed_hunter",
     Theme = _G.theme,
     DisableRayfieldPrompts = false,
     DisableBuildWarnings = false,
     ConfigurationSaving = {
         Enabled = true,
-        FolderName = nil,
-        FileName = "Clematis"
+        FolderName = "ClematisHub",
+        FileName = usernames .. "_SavedConfig_" .. pid
     },
     Discord = {
         Enabled = false,
@@ -93,7 +100,9 @@ local MainWindow = Rayfield:CreateWindow({
     }
 })
 
-local MainTab = MainWindow:CreateTab("Main")
+_G.AutoSellDelay = 30
+
+local MainTab = MainWindow:CreateTab("Auto Farm")
 local InventorySection = MainTab:CreateSection("Inventory")
 local SellAllButton = MainTab:CreateButton({
     Name = "Sell All",
@@ -102,94 +111,33 @@ local SellAllButton = MainTab:CreateButton({
     end,
 })
 
+AutoSell = false
 local AutoSellToggle = MainTab:CreateToggle({
     Name = "Auto Sell",
     CurrentValue = false,
-    Callback = function(AutoSell)
+    Flag = "Auto Sell",
+    Callback = function(Value)
+        AutoSell = Value
         if AutoSell then
-            _G.AutoSell = true
-            while _G.AutoSell do
+            while AutoSell do
                 game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.processGameItemSold:InvokeServer("SellEverything")
-                task.wait(30)
+                task.wait(_G.AutoSellDelay)
             end
-        else
-            _G.AutoSell = false
         end
     end
 })
 
 local FishingSection = MainTab:CreateSection("Fishing")
 
-local DefaultBobberLocation = Vector3.new(0, 5, 0)
-
-local function ParseVector3(text)
-    local success, x, y, z = pcall(function()
-        local parts = text:split(",")
-        return tonumber(parts[1]), tonumber(parts[2]), tonumber(parts[3])
-    end)
-    if success and x and y and z then
-        return Vector3.new(x, y, z)
-    else
-        warn("Invalid input for Vector3. Using default value.")
-        return DefaultBobberLocation
-    end
-end
-
-local SellAllButton = MainTab:CreateButton({
-    Name = "Press To Set Bobber Position",
-    Callback = function()
-        local ply = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-        DefaultBobberLocation = ParseVector3(ply)
-    end,
-})
-
-local Input = MainTab:CreateInput({
-    Name = "Lock Bobber Position",
-    CurrentValue = tostring(DefaultBobberLocation),
-    PlaceholderText = "e.g., 0,5,0",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Text)
-        DefaultBobberLocation = ParseVector3(Text)
-    end,
-})
-
-local AutoFishToggle = MainTab:CreateToggle({
-    Name = "Lock Bobber",
-    CurrentValue = false,
-    Callback = function(InFishs)
-        if InFishs then
-            _G.looplockbobber = true
-            while _G.looplockbobber do
-                wait()
-                local chr = game.Players.LocalPlayer.Character
-                local tool = chr:FindFirstChildOfClass("Tool")
-                if tool and tool:GetAttribute("type") == "Rods" then
-                    local ply = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if ply then
-                        local targetCFrame = CFrame.new(DefaultBobberLocation)
-                        for _, v in pairs(tool:GetDescendants()) do
-                            if v.Name == "FakeBobber" or v.Name == "Bobber" then
-                                v.CFrame = targetCFrame
-                            end
-                        end
-                    else
-                        warn("Cannot find HumanoidRootPart for player.")
-                    end
-                end
-            end
-        else
-            _G.looplockbobber = false
-        end
-    end,
-})
-
+instantbite = false
 local AutoFishToggle = MainTab:CreateToggle({
     Name = "Instant Fish Bite",
     CurrentValue = false,
-    Callback = function(InFish)
-        if InFish then
-            _G.instantbite = true
-            while _G.instantbite do
+    Flag = "InsFish",
+    Callback = function(Value)
+        instantbite = Value
+        if instantbite then
+            while instantbite do
                 task.wait()
                 local chr = game.Players.LocalPlayer.Character
                 local tool = chr:FindFirstChildOfClass("Tool")
@@ -200,26 +148,31 @@ local AutoFishToggle = MainTab:CreateToggle({
                             game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.FishBiting:InvokeServer()
                             repeat
                                 task.wait(0.1)
-                            until v.Transparency == 0 or not _G.instantbite
+                            until v.Transparency == 0 or not instantbite
                         end
                     end
                 end
             end
-        else
-            _G.instantbite = false
         end
     end
 })
 
+AutoFish = false
 local AutoFishToggle = MainTab:CreateToggle({
     Name = "Auto Fish",
     CurrentValue = false,
-    Callback = function(AutoFish)
+    Flag = "AutoFish",
+    Callback = function(Value)
+        AutoFish = Value
         if AutoFish then
-            _G.AutoFish = true
-            while _G.AutoFish do
+            while AutoFish do
                 task.wait()
                 pcall(function()
+                    local args = {
+                        [1] = 1
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer(unpack(args))                    
                     local chr = game.Players.LocalPlayer.Character
                     if not chr:FindFirstChildOfClass("Tool") or (chr:FindFirstChildOfClass("Tool") and chr:FindFirstChildOfClass("Tool"):GetAttribute("type") ~= "Rods") then
                         local plr = game.Players.LocalPlayer.UserId
@@ -241,10 +194,95 @@ local AutoFishToggle = MainTab:CreateToggle({
                 task.wait(2.1)
                 game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("FishCaught"):FireServer()
             end
-        else
-            _G.AutoFish = false
         end
     end
+})
+
+local GhostingSection = MainTab:CreateSection("Ghost Mode")
+local ghostpart = Instance.new("Part")
+ghostpart.Name = "ghostpart"
+ghostpart.Size = Vector3.new(1, 1, 1)
+ghostpart.Transparency = 0.5
+ghostpart.Anchored = true
+ghostpart.CanCollide = false
+ghostpart.Parent = game.Workspace
+
+defaultPlace2Farm = CFrame.new(-59.645916, 35.1940689, -53.6481552, -0.367248833, 0.195572346, 0.909329474, 0.208937556, 0.970005274, -0.124238953, -0.906351745, 0.144366413, -0.39709568)
+local Place2Farm = MainTab:CreateDropdown({
+    Name = "Ghost Location",
+    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave"},
+    CurrentOption = "Port Jackson",
+    MultipleOptions = false,
+    Flag = "SelectedPlace",
+    Callback = function(Options)
+        defaultPlace2Farm = Options[1]
+        if defaultPlace2Farm == "Port Jackson" then
+            location2farm = CFrame.new(-59.645916, 35.1940689, -53.6481552, -0.367248833, 0.195572346, 0.909329474, 0.208937556, 0.970005274, -0.124238953, -0.906351745, 0.144366413, -0.39709568)
+        elseif defaultPlace2Farm == "Eruption Island" then
+            location2farm = CFrame.new(3114.17285, 33.9775887, 1503.49902, -0.998411536, -0.00268871617, -0.0562814847, -0.00594239123, 0.998314977, 0.0577235669, 0.0560314432, 0.0579663217, -0.99674499)
+        elseif defaultPlace2Farm == "Shadow Isles" then
+            location2farm = CFrame.new(2078.04565, 38.1911087, -2464.25415, 0.926496685, 1.70908321e-09, -0.376302987, -4.98511099e-09, 1, -7.73208253e-09, 0.376302987, 9.03966058e-09, 0.926496685)
+        elseif defaultPlace2Farm == "Ancient Shores" then
+            location2farm = CFrame.new(-2380.47192, 38.1911087, -2041.63391, -0.426355541, -1.02534216e-07, 0.904555678, 1.798236e-09, 1, 1.14200716e-07, -0.904555678, 5.03167108e-08, -0.426355541)
+        elseif defaultPlace2Farm == "Pharaoh's Dunes" then
+            location2farm = CFrame.new(-4189.36963, 38.1911087, -236.343857, -0.982234657, -5.93251528e-08, -0.187656701, -6.85465622e-08, 1, 4.2650516e-08, 0.187656701, 5.47560361e-08, -0.982234657)
+        elseif defaultPlace2Farm == "Monster's Borough 1" then
+            location2farm = CFrame.new(-3126.33594, 38.1911087, 2638.38208, -0.584153533, 1.08165047e-07, -0.811643183, 4.63375507e-08, 1, 9.99168108e-08, 0.811643183, 2.07572022e-08, -0.584153533)
+        elseif defaultPlace2Farm == "Monster's Borough 2" then
+            location2farm = CFrame.new(-856.593262, 38.4823265, 2997.9353, 0.063792333, 1.10488836e-08, 0.99796319, 2.95930693e-08, 1, -1.29630973e-08, -0.99796319, 3.03597396e-08, 0.063792333)
+        elseif defaultPlace2Farm == "Monster's Borough 3" then
+            location2farm = CFrame.new(-1574.44348, 38.1911087, 1168.02246, 0.174147293, -1.2217324e-08, 0.984719634, 6.46782272e-09, 1, 1.1263074e-08, -0.984719634, 4.40755787e-09, 0.174147293)
+        elseif defaultPlace2Farm == "Port Jackson's Cave" then
+            location2farm = CFrame.new(2519.26733, 38.1911125, 31573.5352, -0.951426625, -3.38896413e-08, -0.307875574, -1.99341272e-08, 1, -4.84734208e-08, 0.307875574, -3.99816749e-08, -0.951426625)
+        end
+        
+        ghostpart.CFrame = location2farm
+        print("Selected Place to farm: " .. defaultPlace2Farm)
+    end,
+})
+
+Ghosting = false
+local originalPart0
+local GhostMode = MainTab:CreateToggle({
+    Name = "Ghost Mode",
+    CurrentValue = false,
+    Flag = "Ghost",
+    Callback = function(Value)
+        Ghosting = Value
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local rightWrist = character:FindFirstChild("RightWrist", true)
+
+        if rightWrist and rightWrist:IsA("Motor6D") then
+            if Ghosting then
+                originalPart0 = rightWrist.Part0
+                rightWrist.Part0 = ghostpart
+            else
+                if originalPart0 then
+                    rightWrist.Part0 = originalPart0
+                else
+                    warn("ไม่สามารถคืนค่า RightWrist ได้ เนื่องจากไม่มีค่าเดิม!")
+                end
+            end
+        else
+            warn("ไม่พบ RightWrist หรือ RightWrist ไม่ใช่ Motor6D!")
+        end
+    end
+})
+
+
+local HandFishing = MainTab:CreateButton({
+    Name = "Bring Ghost",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if humanoidRootPart then
+            ghostpart.CFrame = humanoidRootPart.CFrame
+        else
+            warn("ไม่พบ HumanoidRootPart!")
+        end
+    end,
 })
 
 local MobsSection = MainTab:CreateSection("Mobs")
@@ -261,6 +299,7 @@ local MobMethodDropdown = MainTab:CreateDropdown({
     Options = MobMethod,
     CurrentOption = DefaultMobMethod,
     MultipleOptions = false,
+    Flag = "MobMethod",
     Callback = function(option)
         if type(option) == "table" then
             DefaultMobMethod = option[1]
@@ -275,6 +314,7 @@ local MobSpeedDropdown = MainTab:CreateDropdown({
     Options = MobMoveSpeed,
     CurrentOption = DefaultMobMoveSpeed,
     MultipleOptions = false,
+    Flag = "MobSpeed",
     Callback = function(option)
         if type(option) == "table" then
             DefaultMobMoveSpeed = option[1]
@@ -289,6 +329,7 @@ local LootMethodDropdown = MainTab:CreateDropdown({
     Options = LootMethod,
     CurrentOption = DefaultLootMethod,
     MultipleOptions = false,
+    Flag = "LootMethod",
     Callback = function(option)
         if type(option) == "table" then
             DefaultLootMethod = option[1]
@@ -298,58 +339,73 @@ local LootMethodDropdown = MainTab:CreateDropdown({
     end
 })
 
-
-local Button = MainTab:CreateButton({
-    Name = "Bypass Anti-Mob Damage (Press This First!)",
-    Callback = function()
-        local mobs = game.workspace
-        for i, v in pairs(mobs:GetDescendants()) do
-            if v.ClassName == "Model" and v:FindFirstChild("Hitbox") and v.Hitbox:FindFirstChild("TouchInterest") then
-                v.Hitbox:FindFirstChild("TouchInterest"):Destroy()
-            end
-        end
-    end
-})
-
+GodMode = false
+AttackBypass = false
 local AntiMobToggle = MainTab:CreateToggle({
     Name = "Anti-Mob Damage",
     CurrentValue = false,
-    Callback = function(GodMode)
+    Flag = "Antimob",
+    Callback = function(Value)
+        GodMode = Value
         if GodMode then
-            _G.GodMode = true
-            while _G.GodMode do
-                task.wait()
-                pcall(function()
+            spawn(function()
+                if not AttackBypass then
                     local mobs = game.workspace
-                    for i, v in pairs(mobs:GetChildren()) do
+                    for i, v in pairs(mobs:GetDescendants()) do
                         if v.ClassName == "Model" and v:FindFirstChild("Hitbox") and v.Hitbox:FindFirstChild("TouchInterest") then
-                            v.Hitbox:FindFirstChild("TouchInterest"):Destroy()
+                            v.Hitbox.TouchInterest:Destroy()
                         end
                     end
-                end)
-            end
-        else
-            _G.GodMode = false
+                    wait(5)
+                    for i, v in pairs(mobs:GetDescendants()) do
+                        if v.ClassName == "Model" and v:FindFirstChild("Hitbox") and v.Hitbox:FindFirstChild("TouchInterest") then
+                            v.Hitbox.TouchInterest:Destroy()
+                            AttackBypass = true
+                        end
+                    end
+                end
+
+                while GodMode do
+                    task.wait(0.2)
+                    pcall(function()
+                        local mobs = game.workspace
+                        for i, v in pairs(mobs:GetChildren()) do
+                            if v.ClassName == "Model" and v:FindFirstChild("Hitbox") and v.Hitbox:FindFirstChild("TouchInterest") then
+                                v.Hitbox.TouchInterest:Destroy()
+                            end
+                        end
+                    end)
+                end
+            end)
         end
     end,
 })
 
+GettingShipTreasure = false
+GettingAllChest = false
+
+MobHunt = false
 local MobHuntToggle = MainTab:CreateToggle({
     Name = "Mob Hunt",
     CurrentValue = false,
-    Callback = function(MobHunt)
+    Flag = "HuntMob",
+    Callback = function(Value)
+        MobHunt = Value
         if MobHunt then
-            _G.MobHunt = true
             task.spawn(function()
-                while _G.MobHunt do
+                while MobHunt do
                     task.wait()
                     pcall(function()
+                        IsLooting = false
+                        if GettingShipTreasure or GettingAllChest then
+                            return
+                        end
                         local player = game.Players.LocalPlayer
                         local character = player.Character or player.CharacterAdded:Wait()
-                        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
                         if not character or not character:FindFirstChild("HumanoidRootPart") then
                             return
                         end
+                        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
                         local spear = nil
                         for _, tool in pairs(game:GetService("ReplicatedStorage").ToolsCache[player.UserId]:GetChildren()) do
                             if tool:GetAttribute("type") == "Spears" then
@@ -364,7 +420,7 @@ local MobHuntToggle = MainTab:CreateToggle({
 
                         local nearestMob, shortestDistance = nil, math.huge
                         for _, mob in pairs(workspace:GetChildren()) do
-                            if mob:IsA("Model") and mob:FindFirstChild("Hitbox") and mob:FindFirstChild("Health") and _G.MobHunt then
+                            if mob:IsA("Model") and mob:FindFirstChild("Hitbox") and mob:FindFirstChild("Health") and MobHunt then
                                 local distance = (humanoidRootPart.Position - mob.Hitbox.Position).Magnitude
                                 if distance < shortestDistance then
                                     nearestMob = mob
@@ -375,6 +431,9 @@ local MobHuntToggle = MainTab:CreateToggle({
 
                         if nearestMob and nearestMob:FindFirstChild("Health") then
                             repeat
+                                if not character or not character:FindFirstChild("HumanoidRootPart") then
+                                    return
+                                end
                                 local destination = nearestMob.Hitbox.CFrame * CFrame.new(0, 20, 0)
                                 if DefaultMobMethod == "Tween" then
                                     local tweenService = game:GetService("TweenService")
@@ -400,28 +459,28 @@ local MobHuntToggle = MainTab:CreateToggle({
                                     true
                                 )
                                 task.wait(2)
-                            until nearestMob.Health.Value == 0 or _G.MobHunt == false or nearestMob.Parent == nil
+                            until nearestMob.Health.Value == 0 or MobHunt == false or nearestMob.Parent == nil
                         end
                     end)
-                    while _G.IsLooting do
+                    while IsLooting do
                         task.wait()
                     end
                 end
             end)
-        else
-            _G.MobHunt = false
         end
     end
 })
 
+Loots = false
 local LootsToggle = MainTab:CreateToggle({
     Name = "Collect Loots",
     CurrentValue = false,
-    Callback = function(Loots)
+    Flag = "Collect Loots",
+    Callback = function(Value)
+        Loots = Value
         if Loots then
-            _G.Loots = true
             task.spawn(function()
-                while _G.Loots do
+                while Loots do
                     task.wait()
                     pcall(function()
                         local player = game.Players.LocalPlayer
@@ -430,11 +489,17 @@ local LootsToggle = MainTab:CreateToggle({
                         if not character or not character:FindFirstChild("HumanoidRootPart") then
                             return
                         end
+                        if GettingShipTreasure or GettingAllChest then
+                            return
+                        end
                         local droppedItems = game:GetService("Workspace"):FindFirstChild("DroppedItems")
                         if not droppedItems then
                             return
                         end
                         for _, loot in pairs(droppedItems:GetChildren()) do
+                            if not character or not character:FindFirstChild("HumanoidRootPart") then
+                                return
+                            end
                             if loot:IsA("Model") and loot.PrimaryPart and loot.PrimaryPart.Transparency < 1 then
                                 local destination = loot.PrimaryPart.CFrame
                                 if DefaultLootMethod == "Tween" then
@@ -449,8 +514,11 @@ local LootsToggle = MainTab:CreateToggle({
                                     humanoidRootPart.CFrame = destination
                                 end
                                 repeat
+                                    if not character or not character:FindFirstChild("HumanoidRootPart") then
+                                        return
+                                    end
                                     wait(1)
-                                    _G.IsLooting = true
+                                    IsLooting = true
                                     local player = game.Players.LocalPlayer
                                     local character = player.Character or player.CharacterAdded:Wait()
                                     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -471,21 +539,16 @@ local LootsToggle = MainTab:CreateToggle({
                                     end
                                 end
                             end
-                                until not loot:IsDescendantOf(droppedItems) or not _G.Loots or loot.PrimaryPart.Transparency > 1
-                                _G.IsLooting = false
+                                until not loot:IsDescendantOf(droppedItems) or not Loots or loot.PrimaryPart.Transparency > 1
+                                IsLooting = false
                             end
                         end
                     end)
                 end
             end)
-        else
-            _G.Loots = false
         end
     end
 })
-
-
-
 
 local ChestsSection = MainTab:CreateSection("Loot Chest")
 
@@ -499,6 +562,7 @@ local LootMethodDropdown = MainTab:CreateDropdown({
     Options = LootChestMethod,
     CurrentOption = DefaultLootChestMethod,
     MultipleOptions = false,
+    Flag = "LootChest",
     Callback = function(option)
         if type(option) == "table" then
             DefaultLootChestMethod = option[1]
@@ -513,6 +577,7 @@ local LootMethodDropdown = MainTab:CreateDropdown({
     Options = LootChestSpeed,
     CurrentOption = DefaultLootChestSpeed,
     MultipleOptions = false,
+    Flag = "LootChestSpeed",
     Callback = function(option)
         if type(option) == "table" then
             DefaultLootChestSpeed = option[1]
@@ -522,52 +587,86 @@ local LootMethodDropdown = MainTab:CreateDropdown({
     end
 })
 
+chest = false
 local ChestToggle = MainTab:CreateToggle({
     Name = "Get All Chests",
     CurrentValue = false,
-    Callback = function(chest)
+    Flag = "GetAllChest",
+    Callback = function(Value)
+        chest = Value
         if chest then
-            _G.chest = true
-            while _G.chest do
-                task.wait()
-                pcall(function()
-                    for i, v in pairs(workspace:GetDescendants()) do
-                        if v.ClassName == "ProximityPrompt" and v.Parent.Name == "HumanoidRootPart" and not v.Parent.Parent:GetAttribute("OpenParticlesType") and v.Enabled and v.ActionText == "Open" and _G.chest then
-                            repeat
-                                task.wait()
-                                if DefaultLootChestMethod == "Tween" then
-                                    local destination = v.Parent.CFrame
-                                    local tweenService = game:GetService("TweenService")
-                                    local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - destination.Position).Magnitude
-                                    local speed = tonumber(DefaultLootChestSpeed) or 150
-                                    local duration = math.max(distance / speed, 0.1)
-                                    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-                                    local tween = tweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {CFrame = destination})
-                                    tween:Play()
-                                    tween.Completed:Wait()
-                                elseif DefaultLootChestMethod == "Teleport" then
-                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Parent.CFrame
-                                end
-                                fireproximityprompt(v)
-                            until v.Enabled == false or _G.chest == false
+            task.spawn(function()
+                while chest do
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character or player.CharacterAdded:Wait()
+                    local foundChest = false
+                    task.wait()
+                    pcall(function()
+                        for i, v in pairs(workspace:GetDescendants()) do
+                            if v.ClassName == "ProximityPrompt" and v.Parent.Name == "HumanoidRootPart" and not v.Parent.Parent:GetAttribute("OpenParticlesType") and v.Enabled and v.ActionText == "Open" and chest then
+                                foundChest = true
+                                GettingAllChest = true
+                                repeat
+                                    task.wait()
+                        if not character or not character:FindFirstChild("HumanoidRootPart") then
+                            return
+                        end
+                                    if DefaultLootChestMethod == "Tween" then
+                                        local destination = v.Parent.CFrame
+                                        local tweenService = game:GetService("TweenService")
+                                        local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - destination.Position).Magnitude
+                                        local speed = tonumber(DefaultLootChestSpeed) or 150
+                                        local duration = math.max(distance / speed, 0.1)
+                                        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                                        local tween = tweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {CFrame = destination})
+                                        tween:Play()
+                                        tween.Completed:Wait()
+                                    elseif DefaultLootChestMethod == "Teleport" then
+                                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Parent.CFrame
+                                    end
+                                    fireproximityprompt(v)
+                                until v.Enabled == false or chest == false
+                            end
+                        end
+                    end)
+                    if MobHunt and Loots and not foundChest then
+                        GettingAllChest = false
+                    end
+                    if not MobHunt and not Loots and not foundChest then
+                        chest = false
+                        if not character or not character:FindFirstChild("HumanoidRootPart") then
+                            return
+                        end
+                        if DefaultLootChestMethod == "Tween" then
+                            local destination = CFrame.new(31, 41, -303)
+                            local tweenService = game:GetService("TweenService")
+                            local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - destination.Position).Magnitude
+                            local speed = tonumber(DefaultLootChestSpeed) or 150
+                            local duration = math.max(distance / speed, 0.1)
+                            local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                            local tween = tweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {CFrame = destination})
+                            tween:Play()
+                            tween.Completed:Wait()
+                        elseif DefaultLootChestMethod == "Teleport" then
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(31, 41, -303)
                         end
                     end
-                end)
-            end
-        else
-            _G.chest = false
+                end
+            end)
         end
     end,
 })
 
+tchest = false
 local ChestToggle = MainTab:CreateToggle({
     Name = "Get Ship Treasure",
     CurrentValue = false,
-    Callback = function(tchest)
+    Flag = "ShipReas",
+    Callback = function(Value)
+       tchest = Value
         if tchest then
-            _G.tchest = true
             task.spawn(function()
-                while _G.tchest do
+                while tchest do
                     local player = game.Players.LocalPlayer
                     local character = player.Character or player.CharacterAdded:Wait()
                     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -575,14 +674,18 @@ local ChestToggle = MainTab:CreateToggle({
                         task.wait(1)
                         return
                     end
+
+                    local foundChest = false
                     for _, ship in pairs(workspace:GetChildren()) do
                         if ship:IsA("Model") and ship:FindFirstChildOfClass("Model") then
                             for _, chest in pairs(ship:GetChildren()) do
                                 if chest:IsA("Model") and chest:FindFirstChild("Gold") then
                                     local gold = chest:FindFirstChild("Gold")
                                     local proximityPrompt = chest:FindFirstChild("HumanoidRootPart"):FindFirstChild("ProximityPrompt")
-                                    
+
                                     if gold and gold:IsA("BasePart") and proximityPrompt then
+                                        foundChest = true
+                                        GettingShipTreasure = true
                                         if DefaultLootChestMethod == "Tween" then
                                             local destination = gold.CFrame
                                             local tweenService = game:GetService("TweenService")
@@ -608,15 +711,33 @@ local ChestToggle = MainTab:CreateToggle({
                             end
                         end
                     end
+                    if MobHunt and Loots and not foundChest then
+                            GettingShipTreasure = false
+                    end
+                    if not MobHunt and not Loots and not foundChest then
+                        if not character or not character:FindFirstChild("HumanoidRootPart") then
+                            return
+                        end
+                        if DefaultLootChestMethod == "Tween" then
+                            local destination = CFrame.new(31, 41, -303)
+                            local tweenService = game:GetService("TweenService")
+                            local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - destination.Position).Magnitude
+                            local speed = tonumber(DefaultLootChestSpeed) or 150
+                            local duration = math.max(distance / speed, 0.1)
+                            local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                            local tween = tweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {CFrame = destination})
+                            tween:Play()
+                            tween.Completed:Wait()
+                        elseif DefaultLootChestMethod == "Teleport" then
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(31, 41, -303)
+                        end
+                    end
                     task.wait(1)
                 end
             end)
-        else
-            _G.tchest = false
         end
     end,
 })
-
 
 local TweenService = game:GetService("TweenService")
  local TpMethods = {"Instant", "Tween"}
@@ -683,10 +804,10 @@ local TweenService = game:GetService("TweenService")
 
  local Slider = TeleportTab:CreateSlider({
      Name = "Tween Speed",
-     Range = {20, 190},
+     Range = {20, 200},
      Increment = 5,
      Suffix = "Speed",
-     CurrentValue = 90,
+     CurrentValue = 150,
      Flag = "Slider1",
      Callback = function(Value)
          if type(Value) == "table" then
@@ -879,6 +1000,43 @@ local Button = Ramdomy:CreateButton({
     end
 })
 
+local Misc = MainWindow:CreateTab("Misc")
+local Playerse = Misc:CreateSection("Player")
+OceanWalker = false
+local OceanWalkers = Misc:CreateToggle({
+    Name = "Walk On Water",
+    CurrentValue = false,
+    Flag = "OceanWalker",
+    Callback = function(Value)
+        OceanWalker = Value
+    if OceanWalker then
+        local Ocean = workspace.OceanWaves.Plane
+        Ocean.CanCollide = true
+    else
+        local Ocean = workspace.OceanWaves.Plane
+        Ocean.CanCollide = false
+    end
+end
+})
+
+local Settings = MainWindow:CreateTab("Setting")
+local Settings1 = Settings:CreateSection("Settings")
+local Autoselldelay = Settings:CreateInput({
+    Name = "Auto Sell Delay(s)",
+    CurrentValue = _G.AutoSellDelay,
+    PlaceholderText = "Input Number",
+    RemoveTextAfterFocusLost = false,
+    Flag = "Autoselldelay",
+    Callback = function(Text)
+        local delay = tonumber(Text)
+        if delay then
+            _G.AutoSellDelay = delay
+        else
+            print("Invalid input! Please enter a valid number.")
+        end
+    end,
+})
+
 _G.searcherayfield = true
 local foundray = false
 while _G.searcherayfield and not foundray do
@@ -890,16 +1048,10 @@ while _G.searcherayfield and not foundray do
             foundray = true
             _G.searcherayfield = false
             rayfie.Enabled = false
-            local player = game:GetService("Players").LocalPlayer
-            local playerGui = player:FindFirstChild("PlayerGui")
-            if not playerGui then
-                warn("PlayerGui not found!")
-                return
-            end
 
             local screenGui = Instance.new("ScreenGui")
             screenGui.Name = "ToggleRayfield"
-            screenGui.Parent = playerGui
+            screenGui.Parent = coreGui
 
             local shadowframe = Instance.new("Frame")
             shadowframe.Size = UDim2.new(0, 100, 0, 100)
