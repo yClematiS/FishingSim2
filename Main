@@ -1069,9 +1069,9 @@ end
 
 local Walkspeed = Misc:CreateSlider({
     Name = "Walkspeed",
-    Range = {16, 100},
+    Range = {16, 200},
     Increment = 1,
-    Suffix = "Bananas",
+    Suffix = "Speed",
     CurrentValue = 16,
     Flag = "Walkspeed",
     Callback = function(Value)
@@ -1084,7 +1084,7 @@ local Walkspeed = Misc:CreateSlider({
     Name = "JumpPower",
     Range = {50, 1000},
     Increment = 10,
-    Suffix = "Bananas",
+    Suffix = "Speed",
     CurrentValue = 50,
     Flag = "JumpPower",
     Callback = function(Value)
@@ -1093,6 +1093,109 @@ local Walkspeed = Misc:CreateSlider({
     end,
  })
 
+Fog = false
+local Fogtoggle = Misc:CreateToggle({
+    Name = "No Fog",
+    CurrentValue = false,
+    Flag = "Fogger",
+    Callback = function(Value)
+        Fog = Value
+    if Fog then
+        local Lighting = game:GetService("Lighting")
+
+        Lighting.FogEnd = 100000
+        
+        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+            Lighting.FogEnd = 100000
+        end)
+        
+        for _,v in ipairs(Lighting:GetDescendants()) do
+            if v:IsA("Atmosphere") then
+                v.Density = 0
+        
+                v:GetPropertyChangedSignal("Density"):Connect(function()
+                    v.Density = 0
+                end)
+            end
+        end
+    else
+        local Lighting = game:GetService("Lighting")
+
+        Lighting.FogEnd = 2000
+        
+        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+            Lighting.FogEnd = 2000
+        end)
+        
+        for _,v in ipairs(Lighting:GetDescendants()) do
+            if v:IsA("Atmosphere") then
+                v.Density = 0.3
+        
+                v:GetPropertyChangedSignal("Density"):Connect(function()
+                    v.Density = 0.3
+                end)
+            end
+        end
+    end
+end
+})
+
+Infjump = false
+local Infjump = Misc:CreateToggle({
+    Name = "Infinite Jump",
+    CurrentValue = false,
+    Flag = "Infjump",
+    Callback = function(Value)
+        Infjump = Value
+        if Infjump then
+            if infJump then infJump:Disconnect() end
+            infJumpDebounce = false
+            infJump = UserInputService.JumpRequest:Connect(function()
+                if not infJumpDebounce then
+                    infJumpDebounce = true
+                    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
+                    if humanoid then
+                        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                    wait()
+                    infJumpDebounce = false
+                end
+            end)
+        else
+            if infJump then infJump:Disconnect() end
+            infJumpDebounce = false
+        end
+    end
+})
+
+local Server = Misc:CreateSection("Server")
+local World1 = Misc:CreateButton({
+    Name = "World 1",
+    Callback = function()
+        local args = {
+            [1] = {
+                ["islandName"] = "PortJackson",
+                ["oceanNum"] = 1
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TeleportRequestEvent"):FireServer(unpack(args))        
+    end,
+ })
+
+ local World2 = Misc:CreateButton({
+    Name = "World 2",
+    Callback = function()
+        local args = {
+            [1] = {
+                ["islandName"] = "SmugglersBay",
+                ["oceanNum"] = 2
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TeleportRequestEvent"):FireServer(unpack(args))
+    end,
+ })
 
 local Settings = MainWindow:CreateTab("Setting")
 local Settings1 = Settings:CreateSection("Settings")
