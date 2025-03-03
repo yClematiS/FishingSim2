@@ -102,6 +102,8 @@ local MainWindow = Rayfield:CreateWindow({
 
 _G.AutoSellDelay = 30
 _G.FishCaughtDelay = 2.1
+_G.ClickFishV2Delay = 0.35
+_G.ClickFishV2Time = 7
 
 local MainTab = MainWindow:CreateTab("Auto Farm")
 local InventorySection = MainTab:CreateSection("Inventory")
@@ -195,6 +197,165 @@ local AutoFishToggle = MainTab:CreateToggle({
                 task.wait(_G.FishCaughtDelay)
                 game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("FishCaught"):FireServer()
             end
+        end
+    end
+})
+
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local screenGui = player:FindFirstChildOfClass("PlayerGui"):FindFirstChild("CrosshairGui")
+
+if not screenGui then
+    screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "CrosshairGui"
+    screenGui.Parent = player:FindFirstChildOfClass("PlayerGui")
+
+    local crosshair = Instance.new("ImageLabel")
+    crosshair.Size = UDim2.new(0, 20, 0, 20)
+    crosshair.Position = UDim2.new(0.5, -10, 0.5, -10)
+    crosshair.BackgroundTransparency = 0.5
+    crosshair.Image = "rbxassetid://72494005359791"
+    crosshair.Parent = screenGui
+    
+    local dragging, dragInput, dragStart, startPos
+
+    local function Update(input)
+        local delta = input.Position - dragStart
+        crosshair.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+
+    local function StartDrag(input)
+        dragging = true
+        dragStart = input.Position
+        startPos = crosshair.Position
+    end
+
+    local function StopDrag()
+        dragging = false
+    end
+
+    crosshair.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            StartDrag(input)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    StopDrag()
+                end
+            end)
+        end
+    end)
+
+    crosshair.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            Update(input)
+        end
+    end)
+end
+
+local function endClick()
+    local UserInputService = game:GetService("UserInputService")
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local screenGui = player:FindFirstChildOfClass("PlayerGui"):FindFirstChild("CrosshairGui")
+    local crosshair = screenGui:FindFirstChildOfClass("ImageLabel")
+    if crosshair then
+        local midX, midY = crosshair.AbsolutePosition.X + 10, crosshair.AbsolutePosition.Y + 10
+        VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, true, game, 0)
+        wait(0.1)
+        VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, false, game, 0)
+    end
+end
+
+local function automacro()
+    local UserInputService = game:GetService("UserInputService")
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local screenGui = player:FindFirstChildOfClass("PlayerGui"):FindFirstChild("CrosshairGui")
+    local crosshair = screenGui:FindFirstChildOfClass("ImageLabel")
+    if crosshair then
+        for i = 1, _G.ClickFishV2Time do
+        local midX, midY = crosshair.AbsolutePosition.X + 10, crosshair.AbsolutePosition.Y + 10
+        VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, true, game, 0)
+        wait(_G.ClickFishV2Delay)
+        VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, false, game, 0)
+        end
+    end
+end
+
+autofishv2 = false
+clicked = false
+local AutoFishV2Toggle = MainTab:CreateToggle({
+    Name = "Auto Fish V2",
+    CurrentValue = false,
+    Flag = "autofishv2",
+    Callback = function(Value)
+        autofishv2 = Value
+        if not autofishv2 then
+            clicked = false
+            game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
+        end
+        if autofishv2 then
+            pcall(function()
+                while autofishv2 do
+                    local args = {
+                        [1] = 1
+                    }
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer(unpack(args))
+                    wait(0.5)
+                    local chr = player.Character
+                    local tool = chr and chr:FindFirstChildOfClass("Tool")
+
+                    if not tool then
+                        clicked = false
+                        return
+                    end
+
+                    task.spawn(function()
+                        if not clicked then
+                        endClick()
+                        clicked = true
+                        end
+                    end)
+
+                    if tool and tool:GetAttribute("type") == "Rods" then
+                        for _, v in pairs(tool:GetDescendants()) do
+                            if v.Name == "FakeBobber" and v:IsA("Instance") and v.Transparency == 1 then
+                                wait(0.8)
+                                task.spawn(function()
+                                    wait(0.18)
+                                    endClick()
+                                end)
+                                ReplicatedStorage.CloudFrameShared.DataStreams.FishBiting:InvokeServer()
+
+                                automacro()
+                                repeat 
+                                    wait(0.1) 
+                                until v.Transparency == 0 or not autofishv2
+                                clicked = false
+                                game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
+                            end
+                        end
+                    end
+                end
+            end)
         end
     end
 })
@@ -1123,54 +1284,33 @@ local Walkspeed = Misc:CreateSlider({
     end,
  })
 
-Fog = false
-local Fogtoggle = Misc:CreateToggle({
-    Name = "No Fog",
-    CurrentValue = false,
-    Flag = "Fogger",
-    Callback = function(Value)
-        Fog = Value
-    if Fog then
-        local Lighting = game:GetService("Lighting")
-
-        Lighting.FogEnd = 100000
-        
-        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-            Lighting.FogEnd = 100000
-        end)
-        
-        for _,v in ipairs(Lighting:GetDescendants()) do
-            if v:IsA("Atmosphere") then
-                v.Density = 0
-        
-                v:GetPropertyChangedSignal("Density"):Connect(function()
-                    v.Density = 0
-                end)
-            end
-        end
-    else
-        local Lighting = game:GetService("Lighting")
-
-        Lighting.FogEnd = 2000
-        
-        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
-            Lighting.FogEnd = 2000
-        end)
-        
-        for _,v in ipairs(Lighting:GetDescendants()) do
-            if v:IsA("Atmosphere") then
-                v.Density = 0.3
-        
-                v:GetPropertyChangedSignal("Density"):Connect(function()
-                    v.Density = 0.3
-                end)
-            end
-        end
-    end
-end
-})
+ Fog = false
+ local Fogtoggle = Misc:CreateToggle({
+     Name = "No Fog",
+     CurrentValue = false,
+     Flag = "Fogger",
+     Callback = function(Value)
+         Fog = Value
+         if Fog then
+            local Lighting = game:GetService("Lighting")
+             Lighting.FogEnd = 100000
+             for i, v in pairs(Lighting:GetDescendants()) do
+                 if v:IsA("Atmosphere") then
+                     v:Destroy()
+                 end
+             end
+         else
+            local Lighting = game:GetService("Lighting")
+             Lighting.FogEnd = 2000
+             local Atmosphere = Instance.new("Atmosphere")
+             Atmosphere.Parent = Lighting
+         end
+     end
+ })
+ 
 
 Infjump = false
+infJumpDebounce = false
 local Infjump = Misc:CreateToggle({
     Name = "Infinite Jump",
     CurrentValue = false,
@@ -1178,15 +1318,13 @@ local Infjump = Misc:CreateToggle({
     Callback = function(Value)
         Infjump = Value
         if Infjump then
+            local user = game.Players.LocalPlayer
             if infJump then infJump:Disconnect() end
             infJumpDebounce = false
             infJump = UserInputService.JumpRequest:Connect(function()
                 if not infJumpDebounce then
                     infJumpDebounce = true
-                    local humanoid = speaker.Character:FindFirstChildWhichIsA("Humanoid")
-                    if humanoid then
-                        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                    end
+                    user.Character:FindFirstChildWhichIsA("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
                     wait()
                     infJumpDebounce = false
                 end
@@ -1255,6 +1393,40 @@ local FishCaughtDelay = Settings:CreateInput({
         local delay = tonumber(Text)
         if delay then
             _G.FishCaughtDelay = delay
+        else
+            print("Invalid input! Please enter a valid number.")
+        end
+    end,
+})
+
+local Section = Settings:CreateSection("Fishing V2 Config")
+
+local AutoFishv2Click = Settings:CreateInput({
+    Name = "Fishing V2 Press Number",
+    CurrentValue = _G.ClickFishV2Time,
+    PlaceholderText = "Default 6",
+    RemoveTextAfterFocusLost = false,
+    Flag = "FishV2Click",
+    Callback = function(Text)
+        local delay = tonumber(Text)
+        if delay then
+            _G.ClickFishV2Time = delay
+        else
+            print("Invalid input! Please enter a valid number.")
+        end
+    end,
+})
+
+local AutoFishv2Delay = Settings:CreateInput({
+    Name = "Fishing V2 Delay Per Press(s)",
+    CurrentValue = _G.ClickFishV2Delay,
+    PlaceholderText = "Default 0.4",
+    RemoveTextAfterFocusLost = false,
+    Flag = "FishV2Delay",
+    Callback = function(Text)
+        local delay = tonumber(Text)
+        if delay then
+            _G.ClickFishV2Delay = delay
         else
             print("Invalid input! Please enter a valid number.")
         end
@@ -1361,4 +1533,4 @@ end
 
 Rayfield:LoadConfiguration()
 
-loadstring(game:HttpGet("https:/https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
