@@ -391,6 +391,7 @@ local AutoFishV2Toggle = MainTab:CreateToggle({
                     end
                 end
             end)
+            
         end
     end
 })
@@ -407,7 +408,7 @@ ghostpart.Parent = game.Workspace
 defaultPlace2Farm = CFrame.new(-59.645916, 35.1940689, -53.6481552, -0.367248833, 0.195572346, 0.909329474, 0.208937556, 0.970005274, -0.124238953, -0.906351745, 0.144366413, -0.39709568)
 local Place2Farm = MainTab:CreateDropdown({
     Name = "Ghost Location",
-    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave","Fungi Lagoon","Obsidian Cavern"},
+    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave","Fungi Lagoon","Obsidian Cavern","Lost Ark"},
     CurrentOption = "Port Jackson",
     MultipleOptions = false,
     Flag = "SelectedPlace",
@@ -435,6 +436,8 @@ local Place2Farm = MainTab:CreateDropdown({
             location2farm = CFrame.new(466.839081, 38.1911087, 3576.58813, -0.936732411, -1.37031453e-08, -0.350046307, -2.51221586e-08, 1, 2.80808408e-08, 0.350046307, 3.50981502e-08, -0.936732411)
         elseif defaultPlace2Farm == "Obsidian Cavern" then
             location2farm = CFrame.new(13552.2803, 953.138245, 32387.291, -0.967958689, 3.31415535e-08, -0.2511096, 8.49723136e-09, 1, 9.92259288e-08, 0.2511096, 9.39128597e-08, -0.967958689)
+        elseif defaultPlace2Farm == "Lost Ark" then
+            location2farm = CFrame.new(14186.5146, 21.6823883, 29751.6387, -0.545272231, 0.497134507, -0.674933672, 0.122873813, 0.843865573, 0.522295833, 0.829204559, 0.201861739, -0.52122128)
         end
         
         ghostpart.CFrame = location2farm
@@ -1271,6 +1274,31 @@ local Button = Quest:CreateButton({
         
         game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("EnterDoor"):InvokeServer(unpack(args))
         
+    end
+})
+
+local Section = Quest:CreateSection("Lost Ark")
+
+local Button = Quest:CreateButton({
+    Name = "Unlock Lost Ark",
+    Callback = function()
+        local args = {
+            [1] = {
+                ["funcName"] = "puzzleCompleted",
+                ["completedPuzzle"] = "LightPuzzle"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("AncientShoresSFAQuestEvent"):FireServer(unpack(args))
+        
+        local args = {
+            [1] = {
+                ["funcName"] = "crystalActivated",
+                ["completedPuzzle"] = "LightPuzzle"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("AncientShoresSFAQuestEvent"):FireServer(unpack(args))
     end
 })
 
