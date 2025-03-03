@@ -207,20 +207,21 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
-local screenGui = player:FindFirstChildOfClass("PlayerGui"):FindFirstChild("CrosshairGui")
+local screenGui = CoreGui:FindFirstChild("CrosshairGui")
 
 if not screenGui then
     screenGui = Instance.new("ScreenGui")
     screenGui.Name = "CrosshairGui"
-    screenGui.Parent = player:FindFirstChildOfClass("PlayerGui")
+    screenGui.Parent = CoreGui
 
     local crosshair = Instance.new("ImageLabel")
-    crosshair.Size = UDim2.new(0, 20, 0, 20)
+    crosshair.Size = UDim2.new(0, 45, 0, 45)
     crosshair.Position = UDim2.new(0.5, -10, 0.5, -10)
-    crosshair.BackgroundTransparency = 0.5
-    crosshair.Image = "rbxassetid://72494005359791"
+    crosshair.BackgroundTransparency = 1
+    crosshair.Image = "rbxassetid://103448393060927"
     crosshair.Parent = screenGui
     
     local dragging, dragInput, dragStart, startPos
@@ -268,11 +269,6 @@ if not screenGui then
 end
 
 local function endClick()
-    local UserInputService = game:GetService("UserInputService")
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    local screenGui = player:FindFirstChildOfClass("PlayerGui"):FindFirstChild("CrosshairGui")
     local crosshair = screenGui:FindFirstChildOfClass("ImageLabel")
     if crosshair then
         local midX, midY = crosshair.AbsolutePosition.X + 10, crosshair.AbsolutePosition.Y + 10
@@ -283,18 +279,13 @@ local function endClick()
 end
 
 local function automacro()
-    local UserInputService = game:GetService("UserInputService")
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    local screenGui = player:FindFirstChildOfClass("PlayerGui"):FindFirstChild("CrosshairGui")
     local crosshair = screenGui:FindFirstChildOfClass("ImageLabel")
     if crosshair then
         for i = 1, _G.ClickFishV2Time do
-        local midX, midY = crosshair.AbsolutePosition.X + 10, crosshair.AbsolutePosition.Y + 10
-        VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, true, game, 0)
-        wait(_G.ClickFishV2Delay)
-        VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, false, game, 0)
+            local midX, midY = crosshair.AbsolutePosition.X + 10, crosshair.AbsolutePosition.Y + 10
+            VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, true, game, 0)
+            wait(_G.ClickFishV2Delay)
+            VirtualInputManager:SendMouseButtonEvent(midX, midY, 0, false, game, 0)
         end
     end
 end
