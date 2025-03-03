@@ -317,7 +317,7 @@ local AutoFishV2Toggle = MainTab:CreateToggle({
                     local args = {
                         [1] = 1
                     }
-                    
+
                     game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer(unpack(args))
                     wait(0.5)
                     local chr = player.Character
@@ -330,27 +330,52 @@ local AutoFishV2Toggle = MainTab:CreateToggle({
 
                     task.spawn(function()
                         if not clicked then
-                        endClick()
-                        clicked = true
+                            endClick()
+                            clicked = true
                         end
                     end)
 
                     if tool and tool:GetAttribute("type") == "Rods" then
+                        local startTime = nil
                         for _, v in pairs(tool:GetDescendants()) do
-                            if v.Name == "FakeBobber" and v:IsA("Instance") and v.Transparency == 1 then
-                                wait(0.8)
-                                task.spawn(function()
-                                    wait(0.18)
-                                    endClick()
-                                end)
-                                ReplicatedStorage.CloudFrameShared.DataStreams.FishBiting:InvokeServer()
+                            if v.Name == "FakeBobber" and v:IsA("Instance") then
+                                if v.Transparency == 1 then
+                               
+                                    if not startTime then
+                                        startTime = tick()
+                                    end
 
-                                automacro()
-                                repeat 
-                                    wait(0.1) 
-                                until v.Transparency == 0 or not autofishv2
-                                clicked = false
-                                game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
+                                    wait(0.8)
+                                    task.spawn(function()
+                                        wait(0.18)
+                                        endClick()
+                                    end)
+
+                                    ReplicatedStorage.CloudFrameShared.DataStreams.FishBiting:InvokeServer()
+                                    automacro()
+
+                                    repeat 
+                                        wait(0.1)
+
+                                        if v == nil then
+                                            startTime = nil
+                                            print("Casting is nil reset")
+                                            game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
+                                            return
+                                        end
+              
+                                        if tick() - startTime > 30 then
+                                            v.Transparency = 0
+                                            startTime = nil
+                                            print("Casting too long reset")
+                                            game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
+                                            return
+                                        end
+                                    until v.Transparency == 0 or not autofishv2
+
+                                    clicked = false
+                                    game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
+                                end
                             end
                         end
                     end
