@@ -399,7 +399,7 @@ ghostpart.Parent = game.Workspace
 defaultPlace2Farm = CFrame.new(-59.645916, 35.1940689, -53.6481552, -0.367248833, 0.195572346, 0.909329474, 0.208937556, 0.970005274, -0.124238953, -0.906351745, 0.144366413, -0.39709568)
 local Place2Farm = MainTab:CreateDropdown({
     Name = "Ghost Location",
-    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave","Fungi Lagoon","Obsidian Cavern","Lost Ark"},
+    Options = {"Port Jackson", "Eruption Island", "Shadow Isles", "Ancient Shores", "Pharaoh's Dunes", "Monster's Borough 1", "Monster's Borough 2", "Monster's Borough 3","Port Jackson's Cave","Fungi Lagoon","Obsidian Cavern","Lost Ark","Facility-X02","Treasure Cove"},
     CurrentOption = "Port Jackson",
     MultipleOptions = false,
     Flag = "SelectedPlace",
@@ -429,6 +429,10 @@ local Place2Farm = MainTab:CreateDropdown({
             location2farm = CFrame.new(13552.2803, 953.138245, 32387.291, -0.967958689, 3.31415535e-08, -0.2511096, 8.49723136e-09, 1, 9.92259288e-08, 0.2511096, 9.39128597e-08, -0.967958689)
         elseif defaultPlace2Farm == "Lost Ark" then
             location2farm = CFrame.new(14186.5146, 21.6823883, 29751.6387, -0.545272231, 0.497134507, -0.674933672, 0.122873813, 0.843865573, 0.522295833, 0.829204559, 0.201861739, -0.52122128)
+        elseif defaultPlace2Farm == "Facility-X02" then
+            location2farm = CFrame.new(15892.0566, 897.188354, 30004.2109, -0.57903868, 4.66123673e-09, 0.815300107, -1.78647452e-09, 1, -6.98598557e-09, -0.815300107, -5.50166845e-09, -0.57903868)
+        elseif defaultPlace2Farm == "Treasure Cove" then
+            location2farm = CFrame.new(10674.3984, 31.1911087, 30109.1309, -0.958807111, 5.95193832e-08, -0.284057885, 6.77584424e-08, 1, -1.91788274e-08, 0.284057885, -3.76361164e-08, -0.958807111)
         end
         
         ghostpart.CFrame = location2farm
@@ -1225,12 +1229,7 @@ local Button = Quest:CreateButton({
         }
         
         game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.PortJacksonQuestFunc:InvokeServer(unpack(args))
-    end
-})
 
-local Button = Quest:CreateButton({
-    Name = "Enter Crystal Cave",
-    Callback = function()
         local args = {
             [1] = "PortJacksonMine",
             [2] = "PJSFAEntranceCover"
@@ -1246,17 +1245,24 @@ local Button = Quest:CreateButton({
     Name = "Unlock Volcano",
     Callback = function()
         local args = {
-            [1] = 7
+            [1] = 5
         }
         
         game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("EruptionIslandSFAQuestEvent"):FireServer(unpack(args))
         
         local args = {
-            [1] = true,
-            [2] = "VolcanoCaverns"
+            [1] = 6
         }
         
-        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("CreateRoom"):InvokeServer(unpack(args))
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("EruptionIslandSFAQuestEvent"):FireServer(unpack(args))
+        
+        wait(1)
+        
+        local args = {
+            [1] = 7
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("EruptionIslandSFAQuestEvent"):FireServer(unpack(args))
 
         local args = {
             [1] = "VolcanoCaverns",
@@ -1290,6 +1296,110 @@ local Button = Quest:CreateButton({
         }
         
         game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("AncientShoresSFAQuestEvent"):FireServer(unpack(args))
+
+        local args = {
+            [1] = "JungleTemple",
+            [2] = "SFAEntrance"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("EnterDoor"):InvokeServer(unpack(args))
+        
+    end
+})
+
+local Section = Quest:CreateSection("Alien")
+
+local Button = Quest:CreateButton({
+    Name = "Get All Star Pharaoh's Dune Quest",
+    Callback = function()
+        local args = {
+            [1] = {
+                ["funcName"] = "pickupStarFragment",
+                ["islandName"] = "PharaohsDunes"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("PharaohsDunesSFAQuestEvent"):FireServer(unpack(args))
+        
+        local args = {
+            [1] = {
+                ["funcName"] = "pickupStarFragment",
+                ["islandName"] = "PortJackson"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("PharaohsDunesSFAQuestEvent"):FireServer(unpack(args))
+        
+        local args = {
+            [1] = {
+                ["funcName"] = "pickupStarFragment",
+                ["islandName"] = "EruptionIsland"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("PharaohsDunesSFAQuestEvent"):FireServer(unpack(args))
+
+        local args = {
+            [1] = {
+                ["funcName"] = "pickupStarFragment",
+                ["islandName"] = "AncientShores"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("PharaohsDunesSFAQuestEvent"):FireServer(unpack(args))
+
+        local args = {
+            [1] = {
+                ["funcName"] = "pickupStarFragment",
+                ["islandName"] = "ShadowIsles"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("PharaohsDunesSFAQuestEvent"):FireServer(unpack(args))
+
+    end
+})
+
+local Section = Quest:CreateSection("Treasure Cove")
+
+local Button = Quest:CreateButton({
+    Name = "Unlock Treasure Cove",
+    Callback = function()
+        local args = {
+            [1] = "pickUp"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TNTEvent"):FireServer(unpack(args))
+
+        local args = {
+            [1] = "carry"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TNTEvent"):FireServer(unpack(args))
+
+        wait(1)
+
+        local args = {
+            [1] = "drop"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TNTEvent"):FireServer(unpack(args))        
+                
+
+        wait()
+        local args = {
+            [1] = "explodeRock"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("ShadowIslesSFAQuestEvent"):FireServer(unpack(args))
+
+        local args = {
+            [1] = "explode"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TNTEvent"):FireServer(unpack(args))
+        
+        
     end
 })
 
