@@ -311,6 +311,7 @@ local AutoFishV2Toggle = MainTab:CreateToggle({
             clicked = false
             game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
         end
+        
         if autofishv2 then
             pcall(function()
                 while autofishv2 do
@@ -340,7 +341,6 @@ local AutoFishV2Toggle = MainTab:CreateToggle({
                         for _, v in pairs(tool:GetDescendants()) do
                             if v.Name == "FakeBobber" and v:IsA("Instance") then
                                 if v.Transparency == 1 then
-                               
                                     if not startTime then
                                         startTime = tick()
                                     end
@@ -360,16 +360,26 @@ local AutoFishV2Toggle = MainTab:CreateToggle({
                                         if v == nil then
                                             startTime = nil
                                             print("Casting is nil reset")
+                                            
                                             game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
-                                            return
+                                            
+                                            autofishv2 = false
+                                            wait(1)
+                                            autofishv2 = true
+                                            break
                                         end
               
                                         if tick() - startTime > 30 then
                                             v.Transparency = 0
                                             startTime = nil
                                             print("Casting too long reset")
+                                        
                                             game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("SetEquippedItem"):InvokeServer()
-                                            return
+                                            
+                                            autofishv2 = false
+                                            wait(1)
+                                            autofishv2 = true 
+                                            break 
                                         end
                                     until v.Transparency == 0 or not autofishv2
 
