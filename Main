@@ -1530,14 +1530,13 @@ local World1 = Misc:CreateButton({
  })
 
  AutoW2 = false
-local pids = game.PlaceId
 local AutoW2 = Misc:CreateToggle({
     Name = "Auto World 2",
     CurrentValue = false,
     Flag = "AutoW2",
     Callback = function(Value)
         AutoW2 = Value
-        if AutoW2 and pids == 286967438 then
+        if AutoW2 and game.PlaceId == 2866967438 then
             local args = {
                 [1] = {
                     ["islandName"] = "SmugglersBay",
