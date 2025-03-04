@@ -1619,7 +1619,9 @@ local AutoFishv2Delay = Settings:CreateInput({
 })
 
 local Section = Settings:CreateSection("Private Code")
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local teleportEvent = ReplicatedStorage:WaitForChild("TeleportToPrivateServerEvent")
 _G.joinPs = false
 local joinPs = Settings:CreateToggle({
     Name = "Auto Private Server",
@@ -1655,37 +1657,29 @@ local reconnect = Settings:CreateToggle({
     Callback = function(Value)
         reconnect = Value
         if reconnect then
-        task.spawn(function()
-            repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
-            print("Auto Disconnect Enabled")
-        
-            local lp = game:GetService('Players').LocalPlayer
-            local po = game.CoreGui.RobloxPromptGui.promptOverlay
-            local ts = game:GetService('TeleportService')
-        
-            local placeID = 2866967438
-            local privateServerCode = _G.ps_code
-        
-            po.ChildAdded:Connect(function(a)
-                if a.Name == 'ErrorPrompt' then
-                    task.wait(3)
-                    local plydisreason = po.ErrorPrompt.MessageArea.ErrorFrame.ErrorMessage.Text
-        
-                    while true do
-                        if _G.joinPs then
+            task.spawn(function()
+                repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
+                print("Auto Reconnect Enabled")
+
+                local lp = Players.LocalPlayer
+                local po = game.CoreGui.RobloxPromptGui.promptOverlay
+
+                po.ChildAdded:Connect(function(a)
+                    if a.Name == 'ErrorPrompt' then
+                        task.wait(3)
+
+                        if _G.joinPs and _G.ps_code and _G.ps_code ~= "" then
                             print("Rejoining Private Server...")
-                            ts:TeleportToPrivateServer(placeID, privateServerCode, {lp})
+                            teleportEvent:FireServer(_G.ps_code)
                         else
                             print("Rejoining Public Server...")
-                            ts:Teleport(placeID)
+                            teleportEvent:FireServer("")
                         end
-                        task.wait(2)
                     end
-                end
+                end)
             end)
-        end)
+        end
     end
-end
 })
 
 _G.searcherayfield = true
