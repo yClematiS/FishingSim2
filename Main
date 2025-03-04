@@ -219,7 +219,7 @@ if not screenGui then
 
     local crosshair = Instance.new("ImageLabel")
     crosshair.Size = UDim2.new(0, 45, 0, 45)
-    crosshair.Position = UDim2.new(0.5, -10, 0.5, -10)
+    crosshair.Position = UDim2.new(0.5, -5, 0.5, 260)
     crosshair.BackgroundTransparency = 1
     crosshair.Image = "rbxassetid://103448393060927"
     crosshair.Parent = screenGui
@@ -1528,6 +1528,27 @@ local World1 = Misc:CreateButton({
         game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TeleportRequestEvent"):FireServer(unpack(args))
     end,
  })
+
+ AutoW2 = false
+local pids = game.PlaceId
+local AutoW2 = Misc:CreateToggle({
+    Name = "Auto World 2",
+    CurrentValue = false,
+    Flag = "AutoW2",
+    Callback = function(Value)
+        AutoW2 = Value
+        if AutoW2 and pids == 286967438 then
+            local args = {
+                [1] = {
+                    ["islandName"] = "SmugglersBay",
+                    ["oceanNum"] = 2
+                }
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("CloudFrameShared"):WaitForChild("DataStreams"):WaitForChild("TeleportRequestEvent"):FireServer(unpack(args))
+        end
+    end
+})
 
 local Settings = MainWindow:CreateTab("Setting")
 local Settings1 = Settings:CreateSection("Settings")
