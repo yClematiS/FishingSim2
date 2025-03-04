@@ -1400,10 +1400,12 @@ game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFun
       end,
   })
   
-  local Section = Settings:CreateSection("Private Code")
   local ReplicatedStorage = game:GetService("ReplicatedStorage")
   local Players = game:GetService("Players")
-  local teleportEvent = ReplicatedStorage:WaitForChild("TeleportToPrivateServerEvent")
+  local TeleportService = game:GetService("TeleportService")
+  
+  local Section = Settings:CreateSection("Private Code")
+  
   _G.joinPs = false
   local joinPs = Settings:CreateToggle({
       Name = "Auto Private Server",
@@ -1414,19 +1416,19 @@ game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFun
       end
   })
   
-  _G.ps_code = nil
-  local PSCODE = Settings:CreateInput({
-      Name = "Private Server Code",
-      CurrentValue = _G.ps_code,
-      PlaceholderText = "Private Code",
+  _G.jobID = nil
+  local JobIDInput = Settings:CreateInput({
+      Name = "Private Server JobID",
+      CurrentValue = _G.jobID,
+      PlaceholderText = "Enter Job ID",
       RemoveTextAfterFocusLost = false,
-      Flag = "ps_code",
+      Flag = "jobID",
       Callback = function(Text)
-          local code = tostring(Text)
-          if code then
-              _G.ps_code = code
+          local jobID = tostring(Text)
+          if jobID then
+              _G.jobID = jobID
           else
-              print("Invalid input! Please enter a valid code.")
+              print("Invalid input! Please enter a valid job ID.")
           end
       end,
   })
@@ -1441,7 +1443,7 @@ game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFun
           if reconnect then
               task.spawn(function()
                   repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
-                  print("Auto Reconnect Enabled")
+                  print("Auto Disconnect Enabled")
   
                   local lp = Players.LocalPlayer
                   local po = game.CoreGui.RobloxPromptGui.promptOverlay
@@ -1450,12 +1452,13 @@ game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFun
                       if a.Name == 'ErrorPrompt' then
                           task.wait(3)
   
-                          if _G.joinPs and _G.ps_code and _G.ps_code ~= "" then
+                          if _G.joinPs and _G.jobID and _G.jobID ~= "" then
                               print("Rejoining Private Server...")
-                              teleportEvent:FireServer(_G.ps_code)
+  
+                              TeleportService:TeleportToPrivateServer(_G.jobID, {lp})
                           else
                               print("Rejoining Public Server...")
-                              teleportEvent:FireServer("")
+                              TeleportService:Teleport(2866967438, lp)
                           end
                       end
                   end)
