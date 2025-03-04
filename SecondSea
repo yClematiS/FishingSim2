@@ -219,7 +219,7 @@ if not screenGui then
 
     local crosshair = Instance.new("ImageLabel")
     crosshair.Size = UDim2.new(0, 45, 0, 45)
-    crosshair.Position = UDim2.new(0.5, -10, 0.5, -10)
+    crosshair.Position = UDim2.new(0.5, -5, 0.5, 260)
     crosshair.BackgroundTransparency = 1
     crosshair.Image = "rbxassetid://103448393060927"
     crosshair.Parent = screenGui
