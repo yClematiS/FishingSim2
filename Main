@@ -1529,7 +1529,7 @@ local World1 = Misc:CreateButton({
     end,
  })
 
- AutoW2 = false
+AutoW2 = false
 local AutoW2 = Misc:CreateToggle({
     Name = "Auto World 2",
     CurrentValue = false,
@@ -1613,6 +1613,35 @@ local AutoFishv2Delay = Settings:CreateInput({
             _G.ClickFishV2Delay = delay
         else
             print("Invalid input! Please enter a valid number.")
+        end
+    end,
+})
+
+local Section = Settings:CreateSection("Private Code")
+
+_G.joinPs = false
+local joinPs = Settings:CreateToggle({
+    Name = "Auto Private Server",
+    CurrentValue = false,
+    Flag = "joinPs",
+    Callback = function(Value)
+        _G.joinPs = Value
+    end
+})
+
+_G.ps_code = nil
+local PSCODE = Settings:CreateInput({
+    Name = "Fishing V2 Delay Per Press(s)",
+    CurrentValue = _G.ps_code,
+    PlaceholderText = "Private Code",
+    RemoveTextAfterFocusLost = false,
+    Flag = "ps_code",
+    Callback = function(Text)
+        local code = tostring(Text)
+        if code then
+            _G.ps_code = code
+        else
+            print("Invalid input! Please enter a valid code.")
         end
     end,
 })
@@ -1716,24 +1745,25 @@ while _G.searcherayfield and not foundray do
 end
 
 Rayfield:LoadConfiguration()
-task.spawn(function()
-    repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
-    print("Auto Disconnect Enabled")
+local attemptingReconnect = false
 
-    local lp = game:GetService('Players').LocalPlayer
-    local po = game.CoreGui.RobloxPromptGui.promptOverlay
-    local ts = game:GetService('TeleportService')
-
-    po.ChildAdded:Connect(function(a)
-        if a.Name == 'ErrorPrompt' then
-            task.wait(3)
-            local plydisreason = po.ErrorPrompt.MessageArea.ErrorFrame.ErrorMessage.Text
-
-            while true do
-                ts:Teleport(2866967438)
-                task.wait(2)
+po.ChildAdded:Connect(function(a)
+    if a.Name == 'ErrorPrompt' and not attemptingReconnect then
+        attemptingReconnect = true
+        task.wait(3)
+        local plydisreason = po.ErrorPrompt.MessageArea.ErrorFrame.ErrorMessage.Text
+        
+        while attemptingReconnect do
+            if _G.joinPs and _G.ps_code and _G.ps_code ~= "" then
+                print("Rejoining Private Server...")
+                ts:TeleportToPrivateServer(placeID, _G.ps_code, {lp})
+            else
+                print("Rejoining Public Server...")
+                ts:Teleport(placeID)
             end
+            task.wait(2)
         end
-    end)
+    end
 end)
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
