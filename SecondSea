@@ -1401,71 +1401,89 @@ game:GetService("ReplicatedStorage").CloudFrameShared.DataStreams.OpenLootboxFun
   })
   
   local ReplicatedStorage = game:GetService("ReplicatedStorage")
-  local Players = game:GetService("Players")
-  local TeleportService = game:GetService("TeleportService")
-  
-  local Section = Settings:CreateSection("Private Code")
-  
-  _G.joinPs = false
-  local joinPs = Settings:CreateToggle({
-      Name = "Auto Private Server",
-      CurrentValue = false,
-      Flag = "joinPs",
-      Callback = function(Value)
-          _G.joinPs = Value
-      end
-  })
-  
-  _G.jobID = nil
-  local JobIDInput = Settings:CreateInput({
-      Name = "Private Server JobID",
-      CurrentValue = _G.jobID,
-      PlaceholderText = "Enter Job ID",
-      RemoveTextAfterFocusLost = false,
-      Flag = "jobID",
-      Callback = function(Text)
-          local jobID = tostring(Text)
-          if jobID then
-              _G.jobID = jobID
-          else
-              print("Invalid input! Please enter a valid job ID.")
-          end
-      end,
-  })
-  
-  reconnect = false
-  local reconnect = Settings:CreateToggle({
-      Name = "Auto Reconnect",
-      CurrentValue = false,
-      Flag = "reconnect",
-      Callback = function(Value)
-          reconnect = Value
-          if reconnect then
-              task.spawn(function()
-                  repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
-                  print("Auto Disconnect Enabled")
-  
-                  local lp = Players.LocalPlayer
-                  local po = game.CoreGui.RobloxPromptGui.promptOverlay
-  
-                  po.ChildAdded:Connect(function(a)
-                      if a.Name == 'ErrorPrompt' then
-                          task.wait(3)
-  
-                          if _G.joinPs and _G.jobID and _G.jobID ~= "" then
-                              print("Rejoining Private Server...")
-  
-                              TeleportService:TeleportToPrivateServer(_G.jobID, {lp})
-                          else
-                              print("Rejoining Public Server...")
-                              TeleportService:Teleport(2866967438, lp)
-                          end
-                      end
-                  end)
-              end)
-          end
-      end
-  })
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+
+local Section = Settings:CreateSection("Auto Rejoin")
+
+_G.joinPs = false
+local joinPs = Settings:CreateToggle({
+    Name = "Auto Private Server",
+    CurrentValue = false,
+    Flag = "joinPs",
+    Callback = function(Value)
+        _G.joinPs = Value
+    end
+})
+
+_G.jobID = nil
+local JobIDInput = Settings:CreateInput({
+    Name = "JobId  (Optional)",
+    CurrentValue = _G.jobID,
+    PlaceholderText = "Enter Job ID",
+    RemoveTextAfterFocusLost = false,
+    Flag = "jobID",
+    Callback = function(Text)
+        local jobID = tostring(Text)
+        if jobID then
+            _G.jobID = jobID
+        else
+            print("Invalid input! Please enter a valid job ID.")
+        end
+    end,
+})
+
+reconnect = false
+local reconnect = Settings:CreateToggle({
+    Name = "Auto Reconnect",
+    CurrentValue = false,
+    Flag = "reconnect",
+    Callback = function(Value)
+        reconnect = Value
+        if reconnect and _G.joinPs then
+            task.spawn(function()
+                repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
+
+                local Players = game:GetService("Players")
+                local TeleportService = game:GetService("TeleportService")
+                local PlaceId = game.PlaceId
+                local JobId = game.JobId
+                local po = game.CoreGui.RobloxPromptGui.promptOverlay
+
+                po.ChildAdded:Connect(function(a)
+                if a.Name == 'ErrorPrompt' then
+                if #Players:GetPlayers() <= 1 then
+                    task.spawn(function()
+                        Players.LocalPlayer:Kick("\nRejoining...")
+                    task.wait(1)
+                        TeleportService:Teleport(PlaceId, Players.LocalPlayer)
+                    end)
+                    end
+                else
+                    TeleportService:TeleportToPlaceInstance(PlaceId, JobId, Players.LocalPlayer)
+                end
+        if reconnect and not _G.joinPs then
+            task.spawn(function()
+                repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui')
+
+                local lp = Players.LocalPlayer
+                local po = game.CoreGui.RobloxPromptGui.promptOverlay
+
+                po.ChildAdded:Connect(function(a)
+                    if a.Name == 'ErrorPrompt' then
+                        task.wait(1)
+
+                            print("Rejoining Public Server...")
+                            TeleportService:Teleport(2866967438, lp)
+                        end
+                end)
+            end)
+        end
+        end)
+        end)
+    end
+    end
+})
   
   _G.searcherayfield = true
   local foundray = false
