@@ -1703,7 +1703,6 @@ local reconnect = Settings:CreateToggle({
     end
 })
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/yClematiS/FishingSim2/refs/heads/main/Api"))()
 Rayfield:LoadConfiguration()
 
 _G.searcherayfield = true
